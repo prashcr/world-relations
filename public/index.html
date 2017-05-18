@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>World Relations</title>
+</head>
+
+<body>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.hires.js"></script>
+    <div id="map" style="position: relative; width: 1000px; height: 600px; margin: auto;"></div>
+    <script>
+        // https://github.com/markmarkoh/datamaps#default-options
+        // All available options
+        const map = new Datamap({
+            element: document.getElementById("map"),
+            projection: 'mercator',
+            scope: 'world'
+        });
+
+        // https://github.com/d3/d3-3.x-api-reference/blob/master/CSV.md
+        // Load csv file, transform rows and call arc function
+        d3.csv('/arcs.csv', function(d) {
+            return {
+                origin: {
+                    latitude: d.lat1,
+                    longitude: d.lon1
+                },
+                destination: {
+                    latitude: d.lat2,
+                    longitude: d.lon2
+                },
+                options: {
+                    strokeWidth: d.strength
+                }
+            }
+        }, function(error, arcs) {
+            console.log(arcs)
+            map.arc(arcs)
+        })
+    </script>
+</body>
+
+</html>
