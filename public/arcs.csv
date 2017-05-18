@@ -1,3 +1,3 @@
-lat1,lon1,lat2,lon2,country1,country2,strength
-22.25,114.1667,47.608013,-122.335167,HKG,USA,5
-34.53909,-81.82133,4.73465,21.25839,USA,CAF,1
+lat1,lon1,lat2,lon2,country1,country2,strength,month
+22.25,114.1667,47.608013,-122.335167,HKG,USA,5,0
+34.53909,-81.82133,4.73465,21.25839,USA,CAF,1,1
