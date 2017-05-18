@@ -12,19 +12,40 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.hires.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
     <div id="map" style="position: relative; width: 1000px; height: 600px; margin: auto;"></div>
     <script>
+        // Reference to retrieved arc data so that we can filter
+        let arcs = []
+
+        // We call this whenever a country is mouseover'd
+        // This gets called too many times, so we debounce it a little
+        const drawArcs = _.debounce(function (map, arcs) {
+            map.arc(arcs)
+        }, 100)
+
         // https://github.com/markmarkoh/datamaps#default-options
         // All available options
         const map = new Datamap({
             element: document.getElementById("map"),
             projection: 'mercator',
-            scope: 'world'
-        });
+            scope: 'world',
+            geographyConfig: {
+                // Overidden so that we can listen to country mouseover events
+                popupTemplate: function (geography, data) {
+                    drawArcs(map, arcs.filter(arc => arc.c1 === geography.id || arc.c2 === geography.id))
+
+                    return '<div class="hoverinfo"><strong>' + geography.properties.name + '</strong></div>'
+                }
+            },
+            arcConfig: {
+                animationSpeed: 400
+            }
+        })
 
         // https://github.com/d3/d3-3.x-api-reference/blob/master/CSV.md
         // Load csv file, transform rows and call arc function
-        d3.csv('/arcs.csv', function(d) {
+        d3.csv('/arcs.csv', function (d) {
             return {
                 origin: {
                     latitude: d.lat1,
@@ -34,14 +55,18 @@
                     latitude: d.lat2,
                     longitude: d.lon2
                 },
-                options: {
-                    strokeWidth: d.strength
-                }
+                strokeWidth: d.strength,
+                c1: d.country1,
+                c2: d.country2
             }
-        }, function(error, arcs) {
-            console.log(arcs)
+        }, function (error, rows) {
+            console.log('Loaded CSV')
+            console.log(rows)
+            arcs = rows
             map.arc(arcs)
         })
+
+        // TODO add slider to filter arcs by month
     </script>
 </body>
 
