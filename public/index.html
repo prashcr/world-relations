@@ -18,15 +18,17 @@
     <div id="month-slider" style="width: 800px; margin: auto; margin-bottom: 30px;"></div>
     <div id="map" style="position: relative; width: 1000px; height: 600px; margin: auto;"></div>
     <script>
+        // Globals
         let arcs = []
         let currMonth = 0
-        let currGeoId = ''
+        let currCountry = ''
+        let notInCountry = true
 
-        // We call this whenever a country is mouseover'd
-        // This gets called too many times, so we debounce it a little
+        // This draws the right arcs based on the current filters state
+        // Debounced because it gets called a lot (every mouseover event)
         const drawArcs = _.debounce(function (map) {
             map.arc(arcs.filter(function (arc) {
-                return (arc.country1 === currGeoId || arc.country2 === currGeoId) &&
+                return (notInCountry || (arc.country1 === currCountry || arc.country2 === currCountry)) &&
                 arc.month == currMonth
             }))
         }, 100)
@@ -38,9 +40,10 @@
             projection: 'mercator',
             scope: 'world',
             geographyConfig: {
-                // Overidden so that we can listen to country mouseover events
+                // https://github.com/markmarkoh/datamaps/blob/master/src/js/datamaps.js#L27
+                // Overidden so we can get the hovered country
                 popupTemplate: function (geography, data) {
-                    currGeoId = geography.id
+                    currCountry = geography.id
                     drawArcs(map)
 
                     return '<div class="hoverinfo"><strong>' + geography.properties.name + '</strong></div>'
@@ -51,6 +54,7 @@
             }
         })
 
+        // https://github.com/MasterMaps/d3-slider/blob/master/index.html#L131
         d3.select('#month-slider').call(
             d3.slider()
             .scale(d3.time.scale().domain([new Date(2017,0,1), new Date(2017,11,1)]))
@@ -62,7 +66,7 @@
             }))
 
         // https://github.com/d3/d3-3.x-api-reference/blob/master/CSV.md
-        // Load csv file, transform rows and call arc function
+        // Load csv file, transform rows and draw arcs
         d3.csv('/arcs.csv', function (d) {
             return {
                 origin: {
@@ -79,13 +83,22 @@
                 month: +d.month
             }
         }, function (error, rows) {
-            console.log('Loaded CSV')
+            console.log('Loaded CSV!')
             console.log(rows)
             arcs = rows
-            map.arc(arcs)
+            drawArcs(map)
         })
 
-        // TODO figure out when we are not on a country and remove geo filter
+        // Remove geo filter for arcs when we aren't on a country
+        // Namespaced listener '.country' to avoid overriding existing handlers (e.g. popup)
+        // https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#on
+        d3.selectAll('.datamaps-subunit')
+        .on('mouseover.country', function () {
+            notInCountry = false
+        })
+        .on('mouseout.country', function () {
+            notInCountry = true
+        })
     </script>
 </body>
 
