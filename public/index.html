@@ -18,22 +18,25 @@
     <script src="https://cdn.rawgit.com/MasterMaps/d3-slider/d18dff4b/d3.slider.js"></script>
     <h1 style="font-family: 'Merriweather', serif; text-align: center">Visualization of international relations through media reports</h1>
     <div id="map" style="position: relative; width: 900px; height: 600px; margin: auto;"></div>
-    <!-- <div id="month-slider" style="width: 800px; margin: auto; margin-top: 30px;"></div> -->
+    <div id="month-slider" style="width: 800px; margin: auto; margin-top: 30px;"></div>
+    <div id="strength-slider" style="width: 800px; margin: auto; margin-top: 30px;"></div>
+
     <script>
         // Globals
         let arcs = []
-        // let currMonth = 0
-        // let currCountry = ''
-        // let notInCountry = true
+        let currMonth = 0
+        let currCountry = ''
+        let notInCountry = true
+        let currNegStrength = -10.0
+        let currPosStrength = 10.0
 
         // This draws the right arcs based on the current filters state
         // Debounced because it gets called a lot (every mouseover event)
         const drawArcs = _.debounce(function (map) {
-            // map.arc(arcs.filter(function (arc) {
-            //     return (notInCountry || arc.origin === currCountry) &&
-            //     arc.month == currMonth
-            // }))
-            map.arc(arcs);
+            map.arc(arcs.filter(function (arc) {
+                return (notInCountry || arc.origin === currCountry) &&
+                arc.month == currMonth && (arc.strength <= currNegStrength || arc.strength >= currPosStrength)
+            }))
         }, 100)
 
         // https://github.com/markmarkoh/datamaps#default-options
@@ -42,16 +45,16 @@
             element: document.getElementById("map"),
             projection: 'mercator',
             scope: 'world',
-            // geographyConfig: {
-            //     // https://github.com/markmarkoh/datamaps/blob/master/src/js/datamaps.js#L27
-            //     // Overidden so we can get the hovered country
-            //     popupTemplate: function (geography, data) {
-            //         currCountry = geography.id
-            //         drawArcs(map)
+            geographyConfig: {
+                // https://github.com/markmarkoh/datamaps/blob/master/src/js/datamaps.js#L27
+                // Overidden so we can get the hovered country
+                popupTemplate: function (geography, data) {
+                    currCountry = geography.id
+                    drawArcs(map)
 
-            //         return '<div class="hoverinfo"><strong>' + geography.properties.name + '</strong></div>'
-            //     }
-            // },
+                    return '<div class="hoverinfo"><strong>' + geography.properties.name + '</strong></div>'
+                }
+            },
             arcConfig: {
                 animationSpeed: 400
             },
@@ -66,20 +69,31 @@
             }
         })
 
+        d3.select('#strength-slider').call(
+             d3.slider()
+             .value([-10.0, 10.0])
+             .axis(true).min(-30.0).max(30.0).step(5)
+             .snap(true)
+             .on('slide', function (event, value) {
+                 currNegStrength = value[0]
+                 currPosStrength = value[1]
+                 drawArcs(map)
+             }))
+
         // https://github.com/MasterMaps/d3-slider/blob/master/index.html#L131
-        // d3.select('#month-slider').call(
-        //     d3.slider()
-        //     .scale(d3.time.scale().domain([new Date(2017,0,1), new Date(2017,11,1)]))
-        //     .axis(d3.svg.axis().ticks(d3.time.months).tickFormat(d3.time.format('%B')))
-        //     .snap(true)
-        //     .on('slide', function (event, value) {
-        //         currMonth = value.getMonth()
-        //         drawArcs(map)
-        //     }))
+        d3.select('#month-slider').call(
+            d3.slider()
+            .scale(d3.time.scale().domain([new Date(2017,0,1), new Date(2017,11,1)]))
+            .axis(d3.svg.axis().ticks(d3.time.months).tickFormat(d3.time.format('%B')))
+            .snap(true)
+            .on('slide', function (event, value) {
+                currMonth = value.getMonth()
+                drawArcs(map)
+            }))
 
         // https://github.com/d3/d3-3.x-api-reference/blob/master/CSV.md
         // Load csv file, transform rows and draw arcs
-        d3.csv('arcs.csv', function (row) {
+        d3.csv('big-arcs.csv', function (row) {
             var color;
             if (Number(row.Strength) < 0) {
                 color = 'rgba(255, 0, 0, 0.5)'
@@ -90,7 +104,9 @@
             return {
                 origin: row.Actor1CountryCode,
                 destination: row.Actor2CountryCode,
-                strokeWidth: 1,
+                month: row.Month,
+                strength: row.Strength*4,
+                strokeWidth: 1.5,
                 strokeColor: color
             }
         }, function (error, rows) {
@@ -103,13 +119,13 @@
         // Remove geo filter for arcs when we aren't on a country
         // Namespaced listener '.country' to avoid overriding existing handlers (e.g. popup)
         // https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#on
-        // d3.selectAll('.datamaps-subunit')
-        // .on('mouseover.country', function () {
-        //     notInCountry = false
-        // })
-        // .on('mouseout.country', function () {
-        //     notInCountry = true
-        // })
+        d3.selectAll('.datamaps-subunit')
+        .on('mouseover.country', function () {
+            notInCountry = false
+        })
+        .on('mouseout.country', function () {
+            notInCountry = true
+        })
         
         // TODO add color scale for strength
     </script>
