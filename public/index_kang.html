@@ -33,7 +33,7 @@
         // Debounced because it gets called a lot (every mouseover event)
         const drawArcs = _.debounce(function (map) {
             map.arc(arcs.filter(function (arc) {
-                return (notInCountry || (arc.country1 === currCountry || arc.country2 === currCountry)) &&
+                return (notInCountry || arc.origin === currCountry) &&
                 arc.month == currMonth
             }))
         }, 100)
@@ -83,6 +83,7 @@
         // Load csv file, transform rows and draw arcs
         d3.csv('arcs_kang.csv', function (d) {
             return {
+<<<<<<< HEAD
                 origin: {
                     latitude: d.lat1,
                     longitude: d.lon1
@@ -103,6 +104,12 @@
                 country1: d.country1,
                 country2: d.country2,
                 month: +d.month
+=======
+                origin: d.Actor1CountryCode,
+                destination: d.Actor2CountryCode,
+                strokeWidth: 1,
+                month: 0
+>>>>>>> master
             }
         }, function (error, rows) {
             console.log('Loaded CSV!')
@@ -121,6 +128,8 @@
         .on('mouseout.country', function () {
             notInCountry = true
         })
+        
+        // TODO add color scale for strength
     </script>
 </body>
 
