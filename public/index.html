@@ -16,8 +16,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.hires.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
     <script src="https://cdn.rawgit.com/MasterMaps/d3-slider/d18dff4b/d3.slider.js"></script>
-    <h1 style="font-family: 'Merriweather', serif; text-align: center">Visualization of international relations through media reports</h1>
-    <div id="map" style="position: relative; width: 900px; height: 600px; margin: auto;"></div>
+    <h3 style="font-family: 'Century', serif; text-align: center">Visualizing International Relations Through The Lens of Global Media</h3>
+    <div id="map" style="position: relative; width: 900px; height: 500px; margin: auto;"></div>
+    <center><button onclick="nc_reset()">Redraw All Arcs</button></center>
     <div id="month-slider" style="width: 800px; margin: auto; margin-top: 30px;"></div>
     <div id="strength-slider" style="width: 800px; margin: auto; margin-top: 30px;"></div>
 
@@ -29,6 +30,8 @@
         let notInCountry = true
         let currNegStrength = -10.0
         let currPosStrength = 10.0
+
+
 
         // This draws the right arcs based on the current filters state
         // Debounced because it gets called a lot (every mouseover event)
@@ -45,10 +48,27 @@
             element: document.getElementById("map"),
             projection: 'mercator',
             scope: 'world',
+            fills: {
+              defaultFill: '#f0af0a',
+              lt50: 'rgba(0,0,244,0.3)',
+              gt50: 'red'
+            },
+            data: {
+              USA: {fillKey: 'lt50' },
+              RUS: {fillKey: 'lt50' },
+              CAN: {fillKey: 'lt50' },
+              BRA: {fillKey: 'gt50' },
+              ARG: {fillKey: 'gt50'},
+              COL: {fillKey: 'gt50' },
+              AUS: {fillKey: 'gt50' },
+              ZAF: {fillKey: 'gt50' },
+              MAD: {fillKey: 'gt50' }       
+            },
             geographyConfig: {
                 // https://github.com/markmarkoh/datamaps/blob/master/src/js/datamaps.js#L27
                 // Overidden so we can get the hovered country
                 popupTemplate: function (geography, data) {
+                    // console.log(geography);
                     currCountry = geography.id
                     drawArcs(map)
 
@@ -95,23 +115,27 @@
         // Load csv file, transform rows and draw arcs
         d3.csv('big-arcs.csv', function (row) {
             var color;
+            
             if (Number(row.Strength) < 0) {
-                color = 'rgba(255, 0, 0, 0.5)'
+                op = Math.abs(row.Strength)/10.0;
+                color = 'rgba(255, 0, 0,'+op+')'
             } 
             else{
-                color = 'rgba(0, 255, 0, 0.5)'
+                op = Math.abs(row.Strength)/10.0;
+                color = 'rgba(0, 255, 0,'+op+')'
             }   
+            console.log(color)
             return {
                 origin: row.Actor1CountryCode,
                 destination: row.Actor2CountryCode,
                 month: row.Month,
-                strength: row.Strength*4,
+                strength: row.Strength*2,
                 strokeWidth: 1.5,
                 strokeColor: color
             }
         }, function (error, rows) {
             console.log('Loaded CSV!')
-            console.log(rows)
+            // console.log(rows)
             arcs = rows
             drawArcs(map)
         })
@@ -124,8 +148,15 @@
             notInCountry = false
         })
         .on('mouseout.country', function () {
-            notInCountry = true
+            // notInCountry = true
         })
+
+        var nc_reset = function(){
+            
+            notInCountry=true;
+            console.log(notInCountry)
+            drawArcs(map)
+        }
         
         // TODO add color scale for strength
     </script>
