@@ -83,6 +83,7 @@
         // Load csv file, transform rows and draw arcs
         d3.csv('arcs_kang.csv', function (d) {
             return {
+<<<<<<< HEAD:public/index_kang.html
 <<<<<<< HEAD
                 origin: {
                     latitude: d.lat1,
@@ -105,11 +106,16 @@
                 country2: d.country2,
                 month: +d.month
 =======
+=======
+>>>>>>> master:public/index.html
                 origin: d.Actor1CountryCode,
                 destination: d.Actor2CountryCode,
                 strokeWidth: 1,
                 month: 0
+<<<<<<< HEAD:public/index_kang.html
 >>>>>>> master
+=======
+>>>>>>> master:public/index.html
             }
         }, function (error, rows) {
             console.log('Loaded CSV!')
