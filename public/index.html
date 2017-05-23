@@ -30,7 +30,7 @@
         // Debounced because it gets called a lot (every mouseover event)
         const drawArcs = _.debounce(function (map) {
             map.arc(arcs.filter(function (arc) {
-                return (notInCountry || (arc.country1 === currCountry || arc.country2 === currCountry)) &&
+                return (notInCountry || (arc.origin === currCountry || arc.destination === currCountry)) &&
                 arc.month == currMonth
             }))
         }, 100)
@@ -80,17 +80,9 @@
         // Load csv file, transform rows and draw arcs
         d3.csv('arcs.csv', function (d) {
             return {
-                origin: {
-                    latitude: d.lat1,
-                    longitude: d.lon1
-                },
-                destination: {
-                    latitude: d.lat2,
-                    longitude: d.lon2
-                },
+                origin: d.country1,
+                destination: d.country2,
                 strokeWidth: d.strength,
-                country1: d.country1,
-                country2: d.country2,
                 month: +d.month
             }
         }, function (error, rows) {
