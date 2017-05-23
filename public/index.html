@@ -18,11 +18,14 @@
     <script src="https://cdn.rawgit.com/MasterMaps/d3-slider/d18dff4b/d3.slider.js"></script>
     <h1 style="font-family: 'Merriweather', serif; text-align: center">Visualization of international relations through media reports</h1>
     <div id="map" style="position: relative; width: 1000px; height: 600px; margin: auto;"></div>
+    <div id="strength-slider" style="width: 800px; margin: auto; margin-top: 30px;"></div>
     <div id="month-slider" style="width: 800px; margin: auto; margin-top: 30px;"></div>
     <script>
         // Globals
         let arcs = []
         let currMonth = 0
+        let currNegStrength = -10.0
+        let currPosStrength = 10.0
         let currCountry = ''
         let notInCountry = true
 
@@ -31,7 +34,7 @@
         const drawArcs = _.debounce(function (map) {
             map.arc(arcs.filter(function (arc) {
                 return (notInCountry || arc.origin === currCountry) &&
-                arc.month == currMonth
+                arc.month == currMonth && (arc.strength <= currNegStrength || arc.strength >= currPosStrength)
             }))
         }, 100)
 
@@ -65,6 +68,18 @@
             }
         })
 
+        // http://benheb.github.io/d3.slider/
+        d3.select('#strength-slider').call(
+            d3.slider()
+            .value([-10.0, 10.0])
+            .axis(true).min(-30.0).max(30.0).step(5)
+            .snap(true)
+            .on('slide', function (event, value) {
+                currNegStrength = value[0]
+                currPosStrength = value[1]
+                drawArcs(map)
+            }))
+
         // https://github.com/MasterMaps/d3-slider/blob/master/index.html#L131
         d3.select('#month-slider').call(
             d3.slider()
@@ -82,6 +97,7 @@
             return {
                 origin: d.Actor1CountryCode,
                 destination: d.Actor2CountryCode,
+                strength: d.Strength,
                 strokeWidth: 1,
                 month: 0
             }
@@ -102,7 +118,7 @@
         .on('mouseout.country', function () {
             notInCountry = true
         })
-        
+
         // TODO add color scale for strength
     </script>
 </body>
