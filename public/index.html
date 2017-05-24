@@ -8,6 +8,11 @@
     <title>International Relations</title>
     <link rel="stylesheet" href="https://cdn.rawgit.com/MasterMaps/d3-slider/d18dff4b/d3.slider.css">
     <link href="https://fonts.googleapis.com/css?family=Merriweather" rel="stylesheet">
+    <style>
+        .datamap {
+            background: #b5d0d0;
+        }
+    </style>
 </head>
 
 <body>
@@ -18,7 +23,7 @@
     <script src="https://cdn.rawgit.com/MasterMaps/d3-slider/d18dff4b/d3.slider.js"></script>
     <h3 style="font-family: 'Century', serif; text-align: center">Visualizing International Relations Through The Lens of Global Media</h3>
     <div id="map" style="position: relative; width: 900px; height: 500px; margin: auto;"></div>
-    <center><button onclick="nc_reset()">Redraw All Arcs</button></center>
+    <center style="margin-top: 10px;"><button onclick="nc_reset()">Redraw All Arcs</button></center>
     <div id="month-slider" style="width: 800px; margin: auto; margin-top: 30px;"></div>
     <div id="strength-slider" style="width: 800px; margin: auto; margin-top: 30px;"></div>
 
@@ -49,16 +54,13 @@
             projection: 'mercator',
             scope: 'world',
             fills: {
-              defaultFill: 'rgba(0,0,244,0.3)',
-              lt50: 'rgba(0,0,244,0.3)'
-            },
-            data: {
-              USA: {fillKey: 'lt50' },
-              RUS: {fillKey: 'lt50' },
-              CAN: {fillKey: 'lt50' }
+              defaultFill: '#f2efe9',
             },
             arcConfig: {
                 animationSpeed: 400
+            },
+            geographyConfig: {
+                borderColor: '#dab3d4'
             },
             done: function(datamap) {
                 // http://jsbin.com/boribamugo/1/edit?html,output
