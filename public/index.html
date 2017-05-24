@@ -28,8 +28,8 @@
         let currMonth = 0
         let currCountry = ''
         let notInCountry = true
-        let currNegStrength = -10.0
-        let currPosStrength = 10.0
+        let currNegStrength = -9.0
+        let currPosStrength = 8.0
 
 
 
@@ -37,8 +37,8 @@
         // Debounced because it gets called a lot (every mouseover event)
         const drawArcs = _.debounce(function (map) {
             map.arc(arcs.filter(function (arc) {
-                return (notInCountry || arc.origin === currCountry) &&
-                arc.month == currMonth && (arc.strength <= currNegStrength || arc.strength >= currPosStrength)
+                return (notInCountry || arc.origin === currCountry || arc.destination === currCountry ) &&
+                arc.month == currMonth && (arc.strength < currNegStrength || arc.strength > currPosStrength)
             }))
         }, 100)
 
@@ -91,9 +91,8 @@
 
         d3.select('#strength-slider').call(
              d3.slider()
-             .value([-10.0, 10.0])
-             .axis(true).min(-30.0).max(30.0).step(5)
-             .snap(true)
+             .value([currNegStrength, currPosStrength])
+             .axis(true).min(-10.0).max(10.0).step(1)
              .on('slide', function (event, value) {
                  currNegStrength = value[0]
                  currPosStrength = value[1]
@@ -103,7 +102,7 @@
         // https://github.com/MasterMaps/d3-slider/blob/master/index.html#L131
         d3.select('#month-slider').call(
             d3.slider()
-            .scale(d3.time.scale().domain([new Date(2017,0,1), new Date(2017,11,1)]))
+            .scale(d3.time.scale().domain([new Date(2016,0,1), new Date(2016,11,1)]))
             .axis(d3.svg.axis().ticks(d3.time.months).tickFormat(d3.time.format('%B')))
             .snap(true)
             .on('slide', function (event, value) {
@@ -113,23 +112,23 @@
 
         // https://github.com/d3/d3-3.x-api-reference/blob/master/CSV.md
         // Load csv file, transform rows and draw arcs
-        d3.csv('big-arcs.csv', function (row) {
+        d3.csv('jan16-abs.csv', function (row) {
             var color;
             
-            if (Number(row.Strength) < 0) {
-                op = Math.abs(row.Strength)/10.0;
-                color = 'rgba(255, 0, 0,'+op+')'
+            if (Number(row.GoldsteinScale) < 0) {
+                op = Math.abs(row.GoldsteinScale)/15.0;
+                color = 'rgba(200, 0, 0,'+op+')'
             } 
             else{
-                op = Math.abs(row.Strength)/10.0;
-                color = 'rgba(0, 255, 0,'+op+')'
+                op = Math.abs(row.GoldsteinScale)/15.0;
+                color = 'rgba(0, 200, 0,'+op+')'
             }   
             console.log(color)
             return {
                 origin: row.Actor1CountryCode,
                 destination: row.Actor2CountryCode,
                 month: row.Month,
-                strength: row.Strength*2,
+                strength: row.GoldsteinScale,
                 strokeWidth: 1.5,
                 strokeColor: color
             }
