@@ -22,9 +22,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.hires.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
     <script src="https://cdn.rawgit.com/MasterMaps/d3-slider/d18dff4b/d3.slider.js"></script>
-    <h2 style="font-family: 'Century', serif; text-align: center">Visualizing International Relations Through The Lens of Global Media</h2>
+    <h2 style="font-family: 'Century', serif; text-align: center; color: #333;">Visualizing International Relations Through The Lens of Global Media</h2>
     <div id="map" style="position: relative; width: 900px; height: 500px; margin: auto;"></div>
-    <center style="margin-top: 15px;"><button onclick="nc_reset()">Redraw All Arcs</button></center>
     <div id="month-slider" style="width: 800px; margin: auto; margin-top: 15px;"></div>
     <div id="strength-slider" style="width: 800px; margin: auto; margin-top: 30px;"></div>
 
@@ -36,7 +35,6 @@
         let notInCountry = true
         let currNegStrength = -9.0
         let currPosStrength = 8.0
-
 
 
         // This draws the right arcs based on the current filters state
@@ -127,12 +125,14 @@
             notInCountry = false
             currCountry = geography.id
             drawArcs(map)
+            d3.event.stopPropagation() // differentiate between sea/country click
         })
 
-        var nc_reset = function(){
+        d3.select('.datamap')
+        .on('click.sea', function () {
             notInCountry = true
             drawArcs(map)
-        }
+        })
     </script>
 </body>
 
