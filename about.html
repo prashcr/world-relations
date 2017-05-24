@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>International Relations</title>
+</head>
+<body style="width: 60vw;">
+    <h1>About this project</h1>
+    <p>
+        The objective of our project was to visualize  international  relations  at  a  global  level  over  time  to highlight geospatial and chronological patterns.
+    </p>
+    <h2>Dataset</h2>
+    <p>
+        We used the <a href="http://www.gdeltproject.org/">Global Database of Events Language and Tone</a> (GDELT).
+        It consists of news media data from around the world in 100+ languages updated daily, with a total size of over 3.5 TB. We wrote some <a href="https://cloud.google.com/bigquery/">BigQuery</a> to query for the data we wanted.
+    </p>
+    <p>
+        We queried for all worldwide events between January-December 2016 that were covered by more than 250 news articles, aggregated them by the involved countries (who did it and who it ocurred to) and computed an average <a href="http://web.pdx.edu/~kinsella/jgscale.html">Goldstein score</a> (normalized by number of articles that covered the event) for each country pair.
+    </p>
+    <h2>Visualization</h2>
+    <p>
+        We used <a href="https://d3js.org/">D3</a> and <a href="http://datamaps.github.io/">Datamaps</a> to plot an arc between each (one way) country pair that had sigificant media coverage of events involving the two countries. The color of the arc represents the normalized Goldstein score for a country pair on a scale of red-yellow-green, which stands for negative-neutral-positive respectively.
+    </p>
+    <p>
+        Click on a country to only show the arcs for that country and click on the sea to view all arcs again. The sliders below the map can be used to filter the arcs by month and their normalized Golstein value.
+    </p>
+</body>
+</html>

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>International Relations</title>
+    <link rel="stylesheet" href="https://cdn.rawgit.com/MasterMaps/d3-slider/d18dff4b/d3.slider.css">
+    <link href="https://fonts.googleapis.com/css?family=Merriweather" rel="stylesheet">
+    <style>
+        .datamap, .d3-slider-range {
+            background: #b5d0d0;
+        }
+
+        /* Github corner CSS */
+        .github-corner:hover .octo-arm {
+            animation: octocat-wave 560ms ease-in-out
+        }
+        @keyframes octocat-wave {
+            0%, 100% {
+                transform: rotate(0)
+            }
+            20%,
+            60% {
+                transform: rotate(-25deg)
+            }
+            40%,
+            80% {
+                transform: rotate(10deg)
+            }
+        }
+        @media (max-width: 500px) {
+            .github-corner:hover .octo-arm {
+                animation: none
+            }
+            .github-corner .octo-arm {
+                animation: octocat-wave 560ms ease-in-out
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.3/d3.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/topojson/1.6.9/topojson.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datamaps/0.5.8/datamaps.all.hires.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.4/lodash.min.js"></script>
+    <script src="https://cdn.rawgit.com/MasterMaps/d3-slider/d18dff4b/d3.slider.js"></script>
+
+    <!--Github corner-->
+    <a href="https://github.com/prashcr/world-relations" class="github-corner" aria-label="View source on Github" target="_blank">
+        <svg width="80" height="80" viewBox="0 0 250 250" style="fill:#151513; color:#fff; position: absolute; top: 0; border: 0; right: 0;" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg>
+    </a>
+
+    <h2 style="font-family: 'Century', serif; text-align: center; color: #333;">Visualizing International Relations Through The Lens of Global Media</h2>
+    <div id="map" style="position: relative; width: 900px; height: 500px; margin: auto;"></div>
+    <div id="month-slider" style="width: 800px; margin: auto; margin-top: 15px;"></div>
+    <div style="text-align:center; padding-top:30px;">2016 Data</div>
+    <div id="strength-slider" style="width: 800px; margin: auto; margin-top: 10px;"></div>
+    <p style="text-align: center; padding-top: 20px;"><a href="http://web.pdx.edu/~kinsella/jgscale.html" target="_blank">Average Goldstein Scale (Relationship Strength)</a></p>
+    <p style="text-align: center; padding-top: 6px;"><a href="about.html" target="_blank">About this project</a></p>
+
+    <script>
+        // Globals
+        let arcs = []
+        let currMonth = 0
+        let currCountry = ''
+        let notInCountry = true
+        let currNegStrength = -9.0
+        let currPosStrength = 8.0
+
+
+        // This draws the right arcs based on the current filters state
+        // Debounced because it gets called a lot (every mouseover event)
+        const drawArcs = _.debounce(function (map) {
+            map.arc(arcs.filter(function (arc) {
+                return (notInCountry || arc.origin === currCountry || arc.destination === currCountry ) &&
+                arc.month == currMonth && (arc.strength >= currNegStrength && arc.strength <= currPosStrength)
+            }))
+        }, 500)
+
+        // https://github.com/markmarkoh/datamaps#default-options
+        // All available options
+        const map = new Datamap({
+            element: document.getElementById("map"),
+            projection: 'mercator',
+            scope: 'world',
+            fills: {
+              defaultFill: '#f2efe9',
+            },
+            arcConfig: {
+                animationSpeed: 400
+            },
+            geographyConfig: {
+                borderColor: '#dab3d4',
+                borderWidth: 0.7
+            },
+            done: function(datamap) {
+                // http://jsbin.com/boribamugo/1/edit?html,output
+                // Mouse wheel zoom
+                datamap.svg.call(d3.behavior.zoom().on("zoom", zoom));
+
+                function zoom() {
+                    datamap.svg.selectAll("g").attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+                }
+            }
+        })
+
+        d3.select('#strength-slider').call(
+             d3.slider()
+             .value([currNegStrength, currPosStrength])
+             .axis(true).min(-10.0).max(10.0).step(1)
+             .on('slide', function (event, value) {
+                 currNegStrength = value[0]
+                 currPosStrength = value[1]
+                 drawArcs(map)
+             }))
+
+        // https://github.com/MasterMaps/d3-slider/blob/master/index.html#L131
+        d3.select('#month-slider').call(
+            d3.slider()
+            .scale(d3.time.scale().domain([new Date(2016,0,1), new Date(2016,11,1)]))
+            .axis(d3.svg.axis().ticks(d3.time.months).tickFormat(d3.time.format('%B')))
+            .snap(true)
+            .on('slide', function (event, value) {
+                currMonth = value.getMonth()
+                drawArcs(map)
+            }))
+
+        const arcColor =  d3.scale.linear()
+            .domain([-10, 0, 8.3])
+            .range(["red", "yellow", "green"])
+
+        // https://github.com/d3/d3-3.x-api-reference/blob/master/CSV.md
+        // Load csv file, transform rows and draw arcs
+        // Add + 0.1 to ensure 0 gs values also have arcs
+        d3.csv('merged2016.csv', function (row) {
+            return {
+                origin: row.Actor1CountryCode,
+                destination: row.Actor2CountryCode,
+                month: row.Month,
+                strength: row.GoldsteinScale,
+                strokeWidth: 1.5,
+                strokeColor: arcColor(row.GoldsteinScale)
+            }
+        }, function (error, rows) {
+            console.log('Loaded CSV!')
+            // console.log(rows)
+            arcs = rows
+            drawArcs(map)
+        })
+
+        // When a country is clicked, filter arcs by that country
+        // Namespaced listener '.country' to avoid overriding existing handlers
+        // https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#on
+        d3.selectAll('.datamaps-subunit')
+        .on('click.country', function (geography) {
+            notInCountry = false
+            currCountry = geography.id
+            drawArcs(map)
+            d3.event.stopPropagation() // differentiate between sea/country click
+        })
+
+        d3.select('.datamap')
+        .on('click.sea', function () {
+            if (d3.event.defaultPrevented) return // see below
+            notInCountry = true
+            drawArcs(map)
+        })
+        .on('dragstart.sea', function () {
+            //https://stackoverflow.com/questions/19931307/d3-differentiate-between-click-and-drag-for-an-element-which-has-a-drag-behavior
+            d3.event.sourceEvent.stopPropagation()
+        })
+
+    </script>
+</body>
+
+</html>
