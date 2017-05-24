@@ -106,12 +106,17 @@
             var color;
 
             if (Number(row.GoldsteinScale) < 0) {
-                op = (Math.abs(row.GoldsteinScale)/15.0) + 0.1;
-                color = 'rgba(200, 0, 0,'+op+')'
+                op = (Math.abs(row.GoldsteinScale)/15.0);
+                color = 'rgba(150, 0, 0,'+op+')'
             }
             else{
-                op = (Math.abs(row.GoldsteinScale)/15.0) + 0.1;
-                color = 'rgba(0, 200, 0,'+op+')'
+                if(Number(row.GoldsteinScale) == 0){
+                    color = 'rgba(0, 0, 150, 0.3)'
+                }
+                else{
+                    op = (Math.abs(row.GoldsteinScale)/15.0);
+                    color = 'rgba(0, 150, 0,'+op+')'
+                }
             }
             return {
                 origin: row.Actor1CountryCode,
