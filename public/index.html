@@ -25,6 +25,7 @@
         let currMonth = 0
         let currCountry = ''
         let notInCountry = true
+        let max_strength = 15;
 
         // This draws the right arcs based on the current filters state
         // Debounced because it gets called a lot (every mouseover event)
@@ -82,7 +83,16 @@
             return {
                 origin: d.Actor1CountryCode,
                 destination: d.Actor2CountryCode,
-                strokeWidth: 1,
+                // strokeWidth: Math.sqrt(Math.abs(d.Strength)),
+                strokeWidth: 1.2,
+                strokeColor: function () {
+                    op = Math.sqrt(Math.abs(d.Strength)/max_strength);
+                    if (d.Strength > 0) {
+                        return `rgba(0,100,0,${op})`;
+                    } else {
+                        return `rgba(100,0,0,${op})`;
+                    }
+                },
                 month: 0
             }
         }, function (error, rows) {
