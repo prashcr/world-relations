@@ -43,7 +43,7 @@
         const drawArcs = _.debounce(function (map) {
             map.arc(arcs.filter(function (arc) {
                 return (notInCountry || arc.origin === currCountry || arc.destination === currCountry ) &&
-                arc.month == currMonth && (arc.strength > currNegStrength && arc.strength < currPosStrength)
+                arc.month == currMonth && (arc.strength >= currNegStrength && arc.strength <= currPosStrength)
             }))
         }, 100)
 
@@ -131,8 +131,6 @@
             notInCountry = true
             drawArcs(map)
         }
-
-        // TODO add color scale for strength
     </script>
 </body>
 
