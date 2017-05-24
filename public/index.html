@@ -99,32 +99,21 @@
                 drawArcs(map)
             }))
 
+        const arcColor =  d3.scale.linear()
+            .domain([-10, 0, 10])
+            .range(["red", "yellow", "green"])
+
         // https://github.com/d3/d3-3.x-api-reference/blob/master/CSV.md
         // Load csv file, transform rows and draw arcs
         // Add + 0.1 to ensure 0 gs values also have arcs
         d3.csv('merged2016.csv', function (row) {
-            var color;
-
-            if (Number(row.GoldsteinScale) < 0) {
-                op = (Math.abs(row.GoldsteinScale)/15.0);
-                color = 'rgba(150, 0, 0,'+op+')'
-            }
-            else{
-                if(Number(row.GoldsteinScale) == 0){
-                    color = 'rgba(0, 0, 150, 0.3)'
-                }
-                else{
-                    op = (Math.abs(row.GoldsteinScale)/15.0);
-                    color = 'rgba(0, 150, 0,'+op+')'
-                }
-            }
             return {
                 origin: row.Actor1CountryCode,
                 destination: row.Actor2CountryCode,
                 month: row.Month,
                 strength: row.GoldsteinScale,
                 strokeWidth: 1.5,
-                strokeColor: color
+                strokeColor: arcColor(row.GoldsteinScale)
             }
         }, function (error, rows) {
             console.log('Loaded CSV!')
