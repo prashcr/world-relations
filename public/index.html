@@ -101,15 +101,16 @@
 
         // https://github.com/d3/d3-3.x-api-reference/blob/master/CSV.md
         // Load csv file, transform rows and draw arcs
-        d3.csv('jan16-abs.csv', function (row) {
+        // Add + 0.1 to ensure 0 gs values also have arcs
+        d3.csv('merged2016.csv', function (row) {
             var color;
 
             if (Number(row.GoldsteinScale) < 0) {
-                op = Math.abs(row.GoldsteinScale)/15.0;
+                op = (Math.abs(row.GoldsteinScale)/15.0) + 0.1;
                 color = 'rgba(200, 0, 0,'+op+')'
             }
             else{
-                op = Math.abs(row.GoldsteinScale)/15.0;
+                op = (Math.abs(row.GoldsteinScale)/15.0) + 0.1;
                 color = 'rgba(0, 200, 0,'+op+')'
             }
             return {
