@@ -38,7 +38,7 @@
         const drawArcs = _.debounce(function (map) {
             map.arc(arcs.filter(function (arc) {
                 return (notInCountry || arc.origin === currCountry || arc.destination === currCountry ) &&
-                arc.month == currMonth && (arc.strength < currNegStrength || arc.strength > currPosStrength)
+                arc.month == currMonth && (arc.strength > currNegStrength && arc.strength < currPosStrength)
             }))
         }, 100)
 
@@ -49,20 +49,13 @@
             projection: 'mercator',
             scope: 'world',
             fills: {
-              defaultFill: '#f0af0a',
-              lt50: 'rgba(0,0,244,0.3)',
-              gt50: 'red'
+              defaultFill: 'rgba(0,0,244,0.3)',
+              lt50: 'rgba(0,0,244,0.3)'
             },
             data: {
               USA: {fillKey: 'lt50' },
               RUS: {fillKey: 'lt50' },
-              CAN: {fillKey: 'lt50' },
-              BRA: {fillKey: 'gt50' },
-              ARG: {fillKey: 'gt50'},
-              COL: {fillKey: 'gt50' },
-              AUS: {fillKey: 'gt50' },
-              ZAF: {fillKey: 'gt50' },
-              MAD: {fillKey: 'gt50' }
+              CAN: {fillKey: 'lt50' }
             },
             arcConfig: {
                 animationSpeed: 400
