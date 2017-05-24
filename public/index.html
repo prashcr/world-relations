@@ -130,9 +130,15 @@
 
         d3.select('.datamap')
         .on('click.sea', function () {
+            if (d3.event.defaultPrevented) return // see below
             notInCountry = true
             drawArcs(map)
         })
+        .on('dragstart.sea', function () {
+            //https://stackoverflow.com/questions/19931307/d3-differentiate-between-click-and-drag-for-an-element-which-has-a-drag-behavior
+            d3.event.sourceEvent.stopPropagation()
+        })
+
     </script>
 </body>
 
