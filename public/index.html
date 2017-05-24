@@ -62,18 +62,7 @@
               COL: {fillKey: 'gt50' },
               AUS: {fillKey: 'gt50' },
               ZAF: {fillKey: 'gt50' },
-              MAD: {fillKey: 'gt50' }       
-            },
-            geographyConfig: {
-                // https://github.com/markmarkoh/datamaps/blob/master/src/js/datamaps.js#L27
-                // Overidden so we can get the hovered country
-                popupTemplate: function (geography, data) {
-                    // console.log(geography);
-                    currCountry = geography.id
-                    drawArcs(map)
-
-                    return '<div class="hoverinfo"><strong>' + geography.properties.name + '</strong></div>'
-                }
+              MAD: {fillKey: 'gt50' }
             },
             arcConfig: {
                 animationSpeed: 400
@@ -114,16 +103,15 @@
         // Load csv file, transform rows and draw arcs
         d3.csv('jan16-abs.csv', function (row) {
             var color;
-            
+
             if (Number(row.GoldsteinScale) < 0) {
                 op = Math.abs(row.GoldsteinScale)/15.0;
                 color = 'rgba(200, 0, 0,'+op+')'
-            } 
+            }
             else{
                 op = Math.abs(row.GoldsteinScale)/15.0;
                 color = 'rgba(0, 200, 0,'+op+')'
-            }   
-            console.log(color)
+            }
             return {
                 origin: row.Actor1CountryCode,
                 destination: row.Actor2CountryCode,
@@ -139,24 +127,21 @@
             drawArcs(map)
         })
 
-        // Remove geo filter for arcs when we aren't on a country
-        // Namespaced listener '.country' to avoid overriding existing handlers (e.g. popup)
+        // When a country is clicked, filter arcs by that country
+        // Namespaced listener '.country' to avoid overriding existing handlers
         // https://github.com/d3/d3-3.x-api-reference/blob/master/Selections.md#on
         d3.selectAll('.datamaps-subunit')
-        .on('mouseover.country', function () {
+        .on('click.country', function (geography) {
             notInCountry = false
-        })
-        .on('mouseout.country', function () {
-            // notInCountry = true
+            currCountry = geography.id
+            drawArcs(map)
         })
 
         var nc_reset = function(){
-            
-            notInCountry=true;
-            console.log(notInCountry)
+            notInCountry = true
             drawArcs(map)
         }
-        
+
         // TODO add color scale for strength
     </script>
 </body>
